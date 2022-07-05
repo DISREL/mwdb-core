@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import { intersperse } from "../helpers";
 
 export function getErrorMessage(error) {
@@ -58,29 +58,20 @@ function CriticalError(props) {
     );
 }
 
-export default class ErrorBoundary extends Component {
-    state = {};
+export default function ErrorBoundary(props) {
+    const [state, setState] = useState({});
 
-    static getDerivedStateFromProps(props) {
-        // Derived state for external critical errors
-        return { propsError: props.error };
-    }
+    useEffect(() => {
+        setState(props);
+    }, [props]);
 
-    static getDerivedStateFromError(error) {
-        // Derived state for render() errors
-        return { renderError: error };
-    }
-
-    render() {
-        if (this.state.renderError)
-            return <CriticalError error={this.state.renderError} />;
-        else if (this.state.propsError) {
-            // Fallback to single Alert
-            return (
-                <div className="container-fluid">
-                    <Alert error={this.state.propsError} />
-                </div>
-            );
-        } else return this.props.children;
-    }
+    if (state.renderError) return <CriticalError error={state.renderError} />;
+    else if (state.propsError) {
+        // Fallback to single Alert
+        return (
+            <div className="container-fluid">
+                <Alert error={state.propsError} />
+            </div>
+        );
+    } else return props.children;
 }
